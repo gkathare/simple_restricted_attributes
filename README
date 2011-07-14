@@ -12,6 +12,8 @@ Features
  - Restrict to add/modify values of particular attributes at model level while creating/updating a record.
  - Restrict functionality perform at before validation.
 
+
+
 *NOTE: Use restricted_attributes plugin if you are using declarative_authorization plugin/gem.
        Download Link - https://github.com/gkathare/restricted_attributes
 
