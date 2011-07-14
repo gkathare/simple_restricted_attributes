@@ -1,0 +1,252 @@
+RestrictedAttributes
+====================
+
+This <a href='https://github.com/gkathare/simple_restricted_attributes'>simple_restricted_attributes</a> plugin provides the capabilities to restrict attributes(fields)
+of db table's while add or update a record. It validate your attributes values before
+your validation stuff.
+
+Features
+========
+
+ - Provides four different ways of restriction on fields (i.e read_only, create_only, update_only and hidden)
+ - Restrict to add/modify values of particular attributes at model level while creating/updating a record.
+ - Restrict functionality perform at before validation.
+
+*NOTE: Use <a href='https://github.com/gkathare/restricted_attributes'>restricted_attributes</a> plugin if you are using declarative_authorization plugin/gem.
+
+
+Method
+======
+has_restricted_attributes(options = {})
+  
+  This method accepts the options in a hash:
+    
+    1 :read_only            # In this you can add attributes to restrict from add/update the value.
+    			    # Access attributes values:  can read,  But can't add or modify
+                            # Format for single attribute -
+                            # :read_only => :name or :read_only => "name"
+                            # Format for array of attributes -
+                            # :read_only => [:name, :bio] or :read_only => ["name", "bio"]
+
+    2 :create_only          # In this you can add attributes to restrict from update the value.
+    			    # Access attributes values: can read and add,  But can't modify.
+                            # Format for single attribute -
+                            # :create_only => :name or :create_only => "name"
+                            # Format for array of attributes -
+                            # :create_only => [:name, :bio] or :create_only => ["name", "bio"]
+
+    3 :update_only          # In this you can add attributes to restrict from add the value.
+    			    # Access attributes values: can read and modify,  But can't add.
+                            # Format for single attribute -
+                            # :update_only => :name or :update_only => "name"
+                            # Format for array of attributes -
+                            # :update_only => [:name, :bio] or :update_only => ["name", "bio"]
+
+    4 :hidden_only          # In this you can add attributes to restrict from add/update the value.
+    			    # Mainly used with 'is_restricted?()' helper Method & instance Method to
+			    # check has a read access or not.
+			    # Access attributes values: can read,  But can't add or modify.
+			    # Format for single attribute -
+                            # :hidden_only => :name or :hidden_only => "name"
+                            # Format for array of attributes -
+                            # :hidden_only => [:name, :bio] or :hidden_only => ["name", "bio"]
+
+    5 :read_only_message    # validation message for read_only attributes
+                            # Format - :read_only_message => "blah blah"  (string type)
+                            # Default message - "is a read only attribute."
+
+    6 :create_only_message  # validation message for create_only attributes
+                            # Format - :create_only_message => "blah blah"  (string type)
+                            # Default message - "can't update, its permitted to create only."
+
+    7 :update_only_message  # validation message for update_only attributes
+                            # Format - :update_only_message => "blah blah"  (string type)
+                            # Default message - "can't add, its permitted to update only."
+
+    8 :hidden_only_message  # validation message for hidden_only attributes
+                            # Format - :hidden_only_message => "blah blah"  (string type)
+                            # Default message - "is a hidden attribute."
+
+
+
+======================================================================================================================
+------------------------------------------ Examples Set 1 ------------------------------------------------------------
+
+
+# Example 1 Simple one
+================================================================
+
+    class Post < ActiveRecord::Base
+        has_restricted_attributes :read_only => [:status],
+                            :create_only => [:title, :publish],
+                            :update_only => [:tags],
+			    :hidden_only => [:activated],
+                            :read_only_message => "is a read only attribute",
+                            :create_only_message => "can't update, its permitted to create only.",
+                            :update_only_message => "can't add, its permitted to update only."
+    end
+
+
+
+    So, the restricted attributes will be as shown in following table.
+    
+    #Post Model :
+
+    |-----------|-------------------------------------------------------------|
+    |           |( Read/Hidden Only ) |  ( Create Only )  |  (Update Only )   |
+    |           | :status /:activated | :title, :publish  |     :tags         |
+    |           |-------------------------------------------------------------|
+    |   Can ->  |   Create  |  Update | Create  | Update  | Create  | Update  |
+    |-----------|-----------|---------|-------------------|-------------------|
+    |   Any     |           |         |         |         |         |         |
+    |   User    |     NO    |    NO   |  YES    |   NO    |   NO    |  YES    |
+    |           |           |         |         |         |         |         |
+    ---------------------------------------------------------------------------
+
+    Console Output :
+    ---------------
+
+    >> post = Post.new(:status => true, :title => "New Title", :tags => "new, topic")
+    >> post.save
+    => false
+
+    >> post.errors
+    => #<OrderedHash {:status => ["is a read only attribute"], :tags=>["can't add, its permitted to update only."]}>
+
+    # for hidden attributes
+    >> post = Post.new(:activated => true)
+    >> post.save
+    => false
+
+    >> post.errors
+    => #<OrderedHash {:status => ["is a hidden attribute"]}>
+    OR
+    >> post.is_restricted?(:read, :activated)  # To check :activated field is restricted to read.
+    => true
+
+
+--------------------------------------------- End Examples Set 1 -----------------------------------------------------
+======================================================================================================================
+
+
+
+
+
+Helper Method & Instance Method ( For View & Controller files )
+===============================================================
+
+
+1 Helper Method `is_restricted?()` :
+------------------------------------
+
+    Syntax:
+    -------------------------------------------------
+    |   is_restricted?(Klass, action, field)        |
+    -------------------------------------------------
+
+     This method accepts 3 arguments :
+
+     1 Klass    # This is a mandatory & first argument of this method.
+                # Should be valid class (i.e Model Name), no String.
+                # Should be in constantize format
+                # Ex :  User ,  Post,  Comment
+
+     2 action   # This is a mandatory & second argument of this method.
+                # Valid actions : "create" or "update" or "read".
+                # Should be either in symbol or in string format
+                # Ex :  :create or :update or :read  or "create" or "update" or "read"
+
+     3 field    # This is a mandatory & third argument of this method.
+                # Should be valid attributes/field of that model or related db table.
+                # Should be either in symbol or in string format
+                # Ex :  :title or "title"
+
+
+
+2 Instance Method `is_restricted?()` :
+--------------------------------------
+
+    Syntax:
+    ----------------------------------------------
+    |    object.is_restricted?(action, field)    |
+    ----------------------------------------------
+
+     This method accepts 2 arguments :
+
+     1 action   # This is a mandatory & first argument of this method.
+                # Valid actions : "create" or "update" or "read".
+                # Should be either in symbol or in string format
+                # Ex :  :create or :update or :read  or "create" or "update" or "read"
+
+     2 field    # This is a mandatory & second argument of this method.
+                # Should be valid attributes/field of that model or related db table.
+                # Should be either in symbol or in string format
+                # Ex :  :title or "title"
+
+
+
+
+======================================================================================================================
+------------------------------------------ Examples Set 2 ------------------------------------------------------------
+
+
+
+# Example 1 ( Use of Helper Method )
+====================================
+
+    # /models/post.rb
+    class Post < ActiveRecord::Base
+        has_restricted_attributes :read_only => [:active],
+                            :create_only => [:title],
+                            :update_only => [:abuse],
+			    :read_only_message => "is a read only attribute"
+    end
+
+    So for this post class we can check its particular field is restricted or not.
+    (You can use this method in controller, view and helper file.)
+
+     ---------------------------------------------------
+     |      is_restricted?(Post, :update, :title)      |
+     ---------------------------------------------------
+
+        - return true(:title is restricted)
+
+
+
+
+# Example 2 ( Use of Instance Method )
+=======================================
+
+    # /models/post.rb
+    class Post < ActiveRecord::Base
+        has_restricted_attributes :read_only => [:active],
+                            :create_only => [:title],
+                            :update_only => [:abuse],
+			    :read_only_message => "is a read only attribute"
+    end
+
+    So for this post class we can check its particular field is restricted or not.
+
+    -----------------------------------------------------
+    |      post = Post.find(params[:id])                |
+    |      is_restricted?(:update, :title)              |
+    -----------------------------------------------------
+
+        - return true(:title is restricted)
+
+
+
+
+--------------------------------------------- End Examples Set 2 -----------------------------------------------------
+======================================================================================================================
+
+
+
+
+===========================================================================
+Easiest way to contact me(Ganesh Kathare):
+My email - kathare[dot]ganesh[at]gmail[dot]com (kathare.ganesh@gmail.com)
+===========================================================================
+
+Copyright (c) 2011 Ganesh Kathare, Navi Mumbai MH, India. released under the MIT license
+
