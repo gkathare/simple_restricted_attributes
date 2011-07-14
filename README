@@ -1,4 +1,4 @@
-RestrictedAttributes
+SimpleRestrictedAttributes
 ====================
 
 This simple_restricted_attributes plugin provides the capabilities to restrict attributes(fields)
@@ -14,8 +14,11 @@ Features
 
 
 
-*NOTE: Use restricted_attributes plugin if you are using declarative_authorization plugin/gem.
-       Download Link - https://github.com/gkathare/restricted_attributes
+*NOTE: If you are using declarative_authorization plugin/gem then use restricted_attributes plugin to set role wise restriction/permission on various users to change the value of an attributes.
+(More Info - <a href="https://github.com/gkathare/restricted_attributes">https://github.com/gkathare/restricted_attributes</a>)
+
+
+
 
 
 Method
