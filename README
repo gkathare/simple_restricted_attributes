@@ -11,10 +11,12 @@ Features
  - Provides four different ways of restriction on fields (i.e read_only, create_only, update_only and hidden)
  - Restrict to add/modify values of particular attributes at model level while creating/updating a record.
  - Restrict functionality perform at before validation.
+ - Able to set restriction on instance varibles also.
 
 
 
-*NOTE: If you are using declarative_authorization plugin/gem then use restricted_attributes plugin to set role wise restriction/permission on various users to change the value of an attributes.
+
+*NOTE: You can try its more featured version(i.e restricted_attributes plugin) ONLY if you are using declarative_authorization plugin/gem. Find more information about that plugin on following link
 (More Info - https://github.com/gkathare/restricted_attributes)
 
 
